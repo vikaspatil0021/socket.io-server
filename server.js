@@ -9,7 +9,9 @@ import { Server } from "socket.io";
 const io = new Server(mainServer, {
     cors: {
         origin: "*"
-    }
+    },
+    transports: ['websocket',  'polling']
+
 });
 
 let users = []
