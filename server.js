@@ -10,7 +10,7 @@ const io = new Server(mainServer, {
     cors: {
         origin: "*"
     },
-    transports: ['websocket',  'polling']
+    transports: [  'polling','websocket']
 
 });
 
