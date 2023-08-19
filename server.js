@@ -8,12 +8,10 @@ import { Server } from "socket.io";
 
 const io = new Server(mainServer, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-        transports: ['websocket', 'polling'],
-        credentials: true
+        origin: "*"
     },
-    allowEIO3: true
+    transports: ['websocket',  'polling']
+
 });
 
 let users = []
