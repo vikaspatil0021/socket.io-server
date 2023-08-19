@@ -1,18 +1,18 @@
 import express from "express";
 const app = express();
 
+import cors from cors;
 import { createServer } from "http";
 const mainServer = createServer(app);
 
 import { Server } from "socket.io";
 
 const io = new Server(mainServer, {
-    cors: {
-        origin: "*"
-    },
     transports: ['websocket',  'polling']
 
 });
+
+app.use(cors());
 
 let users = []
 io.on("connection", (socket) => {
