@@ -1,18 +1,18 @@
 import express from "express";
-const app = express();
-
-import cors from "cors";
 import { createServer } from "http";
-const mainServer = createServer(app);
-
 import { Server } from "socket.io";
 
-const io = new Server(mainServer, {
-    transports: ['websocket',  'polling']
+const app = express();
+const mainServer = createServer(app);
 
+
+const io = new Server(mainServer, {
+    transports: ['websocket',  'polling'],
+    cors:{
+        origin:"*"
+    }
 });
 
-app.use(cors());
 
 let users = []
 io.on("connection", (socket) => {
@@ -42,8 +42,9 @@ io.on("connection", (socket) => {
 });
 
 
-export default app;
 
 mainServer.listen(process.env.PORT | 5000, (req, res) => {
     console.log("server is listening on port 5000");
 });
+
+
