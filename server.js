@@ -1,45 +1,22 @@
 import express from "express";
 import { createServer } from "http";
-import { Server } from "socket.io";
+import mongoConnection  from "./mongodb/mongodb.js";
+import socketConnection from "./socket/socket.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 const mainServer = createServer(app);
 
 
-const io = new Server(mainServer, {
-    transports: ['websocket',  'polling'],
-    cors:{
-        origin:"*"
-    }
-});
+// socket io connection
+socketConnection(mainServer);
+
+// mongodb connection
+mongoConnection();
 
 
-let users = []
-io.on("connection", (socket) => {
 
-    socket.on('join room',(username)=>{
-        socket.join("1");
-        users.push(username);
-        socket.username = username;
-
-        io.emit('update users',users);
-        socket.to("1").emit('new user',username);
-
-    })
-    
-
-    socket.on("disconnect",()=>{
-        users = [...users].filter(each=>{
-            return each!==socket.username
-        });
-        io.emit('update users',users);
-        if(socket.username){
-
-            io.in("1").emit('user left',socket.username);
-        }
-
-    });
-});
 
 
 
