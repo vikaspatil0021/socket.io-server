@@ -21,7 +21,7 @@ const RoomsInfo = mongoose.model("room", roomsSchema);
 
 
 export {
-    ChatInfo,
+    ChatInfo, 
     UserInfo,
     RoomsInfo
 }
