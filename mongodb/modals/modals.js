@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
     username: String,
-    fullName:String
 });
 
 const roomsSchema = mongoose.Schema({
@@ -11,13 +10,14 @@ const roomsSchema = mongoose.Schema({
 
 const chatSchema = mongoose.Schema({
     msg: String,
-    username: String
+    userId: String,
+    roomId: String
 });
 
 
 const ChatInfo = mongoose.model("message", chatSchema);
 const UserInfo = mongoose.model("user", userSchema);
-const RoomsInfo = mongoose.model("user", roomsSchema);
+const RoomsInfo = mongoose.model("room", roomsSchema);
 
 
 export {

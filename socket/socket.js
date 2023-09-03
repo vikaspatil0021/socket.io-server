@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 
-import { ChatInfo } from "../mongodb/modals/modals.js";
+import { ChatInfo, RoomsInfo, UserInfo } from "../mongodb/modals/modals.js";
 
 const socketConnection = (mainServer) => {
 
@@ -14,44 +14,47 @@ const socketConnection = (mainServer) => {
 
     let users = []
     io.on("connection", (socket) => {
-
-        socket.on('join room',async (username) => {
-            console.log(username + ' and ' + socket.id)
-            socket.join("room1");
-            users.push(username);
-            socket.username = username;
-
-
-            io.emit('update users', users);
-            socket.to("room1").emit('new user', username);
-
-            const results = await ChatInfo.find();
-            socket.emit('get chats', results);
-
+        socket.on("userAuth", async ({ username }) => {
+            const existUser = await UserInfo.findOne({ username });
+            if (!existUser) {
+                var newUser = await UserInfo.create({
+                    username
+                });
+            }
+            socket.emit("userAuth", (existUser) ? existUser._id : newUser._id)
         });
 
-        socket.on("user message", async (data) => {
-            console.log(data.userName + ' for new msg ' + socket.id)
-            await ChatInfo.create({
-                msg: data.msg,
-                username: data.userName
+
+        socket.on("create room", async ({ otherUsername, userId0 }) => {
+            const existUser = await UserInfo.findOne({ username: otherUsername });
+            const existRoom = await RoomsInfo.findOne({ users: { $all: [(existUser._id).toHexString(), userId0] } });
+
+            if (existRoom) {
+                socket.join((existRoom._id).toHexString());
+                socket.emit("Room detail", existRoom);
+
+            } else {
+
+                var newRoom = await RoomsInfo.create({
+                    users: [(existUser._id).toHexString(), userId0]
+                });
+                socket.join((newRoom._id).toHexString());
+
+                socket.emit("Room detail", newRoom);
+            }
+        });
+
+        socket.on("new message", async ({ userId0, msg, activeRoom }) => {
+            const message = await ChatInfo.create({
+                msg,
+                userId: userId0,
+                roomId: activeRoom
             });
-            io.in("room1").emit('newMessage', data);
- 
+            console.log(message)
+            io.in(activeRoom).emit("newMessage",message);
         })
 
 
-        socket.on("disconnect", () => {
-            users = [...users].filter(each => {
-                return each !== socket.username
-            });
-            io.emit('update users', users);
-            if (socket.username) {
-
-                socket.to("room1").emit('user left', socket.username);
-            }
-
-        });
     });
 }
 
